@@ -1,6 +1,14 @@
 <template>
   <div class="dashboard-container">
     <div class="dashboard-text">name: {{ name }}</div>
+    <page-tools :show-before="true">
+      <template v-slot:before>
+        <span>数九寒冬就是</span>
+      </template>
+      <template v-slot:after>
+        <el-button type="danger">sdsajodsajk</el-button>
+      </template>
+    </page-tools>
   </div>
 </template>
 
