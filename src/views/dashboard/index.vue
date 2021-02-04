@@ -9,6 +9,7 @@
         <el-button type="danger">sdsajodsajk</el-button>
       </template>
     </page-tools>
+    <upload-excel/>
   </div>
 </template>
 
