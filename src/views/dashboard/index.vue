@@ -10,6 +10,7 @@
       </template>
     </page-tools>
     <upload-excel/>
+    <image-upload/>
   </div>
 </template>
 
