@@ -20,9 +20,10 @@
               <img
                 slot="reference"
                 v-imageerror="require('@/assets/common/bigUserHeader.png')"
-                :src="row.staffPhoto "
+                :src="row.staffPhoto"
                 style="border-radius: 50%; width: 100px; height: 100px; padding: 10px"
                 alt=""
+                @click="showQrCode(row.staffPhoto)"
               >
             </template>
           </el-table-column>
@@ -48,7 +49,7 @@
               <el-button type="text" size="small">转正</el-button>
               <el-button type="text" size="small">调岗</el-button>
               <el-button type="text" size="small">离职</el-button>
-              <el-button type="text" size="small">角色</el-button>
+              <el-button type="text" size="small" @click="editRole(row.id)">角色</el-button>
               <el-button type="text" size="small" @click="deleteEmployee(row.id)">删除</el-button>
             </template>
           </el-table-column>
@@ -68,6 +69,12 @@
     </div>
 <!--    sync修饰符子组件触发update:showDialog就能关闭该组件-->
     <add-employee :show-dialog.sync="showDialog" />
+    <el-dialog title="二维码" :visible.sync="showCodeDialog" @opened="showQrCode" @close="imgUrl=''">
+      <el-row type="flex" justify="center">
+        <canvas ref="myCanvas" />
+      </el-row>
+    </el-dialog>
+    <assign-role ref="assignRole" :show-role-dialog.sync="showRoleDialog" :user-id="userId" />
   </div>
 </template>
 
@@ -76,10 +83,12 @@ import { delEmployee, getEmployeeList } from '@/api/employees'
 import EmployeeEnum from '@/api/constant/employees'
 import AddEmployee from './components/add-employee'
 import { formatDate } from '@/filters'
+import QrCode from 'qrcode'
+import AssignRole from './components/assign-role'
 
 export default {
   components: {
-    AddEmployee
+    AddEmployee, AssignRole
   },
   data() {
     return {
@@ -90,13 +99,29 @@ export default {
         size: 10,
         total: 0 // 总数
       },
-      showDialog: false
+      showDialog: false,
+      showCodeDialog: false,
+      showRoleDialog: false,
+      userId: null
     }
   },
   created() {
     this.getEmployeeList()
   },
   methods: {
+    showQrCode(url) {
+      // url存在的情况下 才弹出层
+      if (url) {
+        this.showCodeDialog = true // 数据更新了 但是我的弹层会立刻出现吗 ？页面的渲染是异步的！！！！
+        this.$nextTick(() => {
+          // 此时可以确认已经有ref对象了
+          QrCode.toCanvas(this.$refs.myCanvas, url) // 将地址转化成二维码
+          // 如果转化的二维码后面信息 是一个地址的话 就会跳转到该地址 如果不是地址就会显示内容
+        })
+      } else {
+        this.$message.warning('该用户还未上传头像')
+      }
+    },
     changePage(newPage) {
       this.page.page = newPage
       this.getEmployeeList()
@@ -185,6 +210,13 @@ export default {
       })
       // return rows.map(item => Object.keys(headers).map(key => item[headers[key]]))
       // 需要处理时间格式问题
+    },
+    // 编辑角色
+    async  editRole(id) {
+      this.userId = id // props传值 是异步的
+      console.log(this.$refs)
+      await this.$refs.assignRole.getUserDetailById(id) // 父组件调用子组件方法
+      this.showRoleDialog = true
     }
   }
 }
