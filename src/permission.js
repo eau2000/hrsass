@@ -16,9 +16,15 @@ router.beforeEach(async function(to, from, next) {
       next('/') // 跳到主页
     } else {
       if (!store.getters.userId) {
-        await store.dispatch('user/getUserInfo')
+        const { roles } = await store.dispatch('user/getUserInfo')
+        const routes = await store.dispatch('permission/filterRoutes', roles.menus)
+        // console.log(routes)
+        router.addRoutes([...routes, { path: '*', redirect: '/404', hidden: true }])
+        // 添加路由之后，用next(to.path)
+        next(to.path) // 跳到对应的地址
+      } else {
+        next() // 直接放行
       }
-      next() // 直接放行
     }
   } else {
     // 如果没有token

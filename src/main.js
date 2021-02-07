@@ -14,6 +14,7 @@ import store from './store'
 import router from './router'
 
 import * as directives from '@/directives'
+import CheckPermission from '@/mixin/ckeckPermission'
 import '@/icons' // icon
 import '@/permission' // permission control
 
@@ -45,6 +46,7 @@ Object.keys(filters).forEach(key => {
   // 注册过滤器
   Vue.filter(key, filters[key])
 })
+Vue.mixin(CheckPermission)
 
 new Vue({
   el: '#app',
